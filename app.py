@@ -45,7 +45,7 @@ df = df[df["second_level_domain"].isin(valid_domains)]
 # ----------------------------------------------------
 # Dataset Preview
 # ----------------------------------------------------
-st.subheader("📄 Dataset Preview (Filtered: >5 titles per domain)")
+st.subheader("📄 Dataset Preview")
 st.dataframe(df.head())
 
 # ----------------------------------------------------
