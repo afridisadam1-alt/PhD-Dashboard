@@ -195,13 +195,13 @@ st.session_state.selected_node = selected_node
 st.subheader("ℹ️ Selected Node Details")
 if selected_node:
     top_titles_node_full = df[df["second_level_domain"] == selected_node]["title_english"].tolist()
-    top_titles_preview = [truncate_text(t) for t in top_titles_node_full[:10]]  # first 10 titles
+    top_titles_preview = [truncate_text(t) for t in top_titles_node_full[:5]]  # first 10 titles
     top_countries = country_counts.get(selected_node, [])
     keywords_list = top_keywords.get(selected_node, [])
     
     st.markdown(f"### **{selected_node}**")
     st.write("**Top Titles (Full):**")
-    for t in top_titles_node_full[:10]:
+    for t in top_titles_node_full[:5]:
         st.write(f"- {t}")
     st.write(f"**Top Countries (Top 5):** {', '.join(top_countries) if top_countries else 'N/A'}")
     st.write(f"**Keywords:** {', '.join(keywords_list) if keywords_list else 'N/A'}")
