@@ -30,7 +30,7 @@ url = f"https://drive.google.com/uc?id={file_id}"
 def load_dataset():
     if not os.path.exists(csv_file):
         gdown.download(url, csv_file, quiet=True)
-    return pd.read_csv(csv_file, encoding='utf-8')
+    return pd.read_csv(csv_file, encoding='utf-8', low_memory=False)
 
 df = load_dataset()
 
@@ -110,11 +110,10 @@ def build_graph_country(df):
 # Precompute Top Titles, Keywords, and Top Countries
 # ----------------------------------------------------
 @st.cache_data
-def compute_top_info(df):
-    top_titles = df.groupby("second_level_domain")["title_english"].agg(
+def compute_top_titles(df):
+    return df.groupby("second_level_domain")["title_english"].agg(
         lambda x: x.mode().iloc[0] if not x.mode().empty else "N/A"
     ).to_dict()
-    return top_titles
 
 @st.cache_data
 def get_precomputed_keywords(df):
@@ -132,16 +131,21 @@ def get_precomputed_keywords(df):
 def compute_top_countries(df, top_n=5):
     country_counts_dict = {}
     for domain, group in df.groupby("second_level_domain"):
-        countries_list = group['countries'].explode()
-        countries_list = [c for c in countries_list if c]  # remove empty
+        countries_list = []
+        for c_list in group['countries']:
+            if isinstance(c_list, list):
+                countries_list.extend(c_list)
+        countries_list = [c.strip() for c in countries_list if c.strip()]
         if countries_list:
+            # Count and remove duplicates
             top_countries = [c for c, _ in Counter(countries_list).most_common(top_n)]
-            country_counts_dict[domain] = top_countries
+            top_countries = list(dict.fromkeys(top_countries))
+            country_counts_dict[domain] = top_countries[:top_n]
         else:
             country_counts_dict[domain] = []
     return country_counts_dict
 
-top_titles = compute_top_info(df)
+top_titles = compute_top_titles(df)
 top_keywords = get_precomputed_keywords(df)
 country_counts = compute_top_countries(df, top_n=5)
 
@@ -150,8 +154,8 @@ country_counts = compute_top_countries(df, top_n=5)
 # ----------------------------------------------------
 st.sidebar.title("⚙ Graph Options")
 graph_type = st.sidebar.radio("Select Graph Type:", ("Title Graph", "Country Graph"))
-TOP_COMMUNITIES = st.sidebar.slider("Top Communities", 1, 5, 3)
-TOP_NODES_PER_COMM = st.sidebar.slider("Top Nodes per Community", 5, 50, 20)
+TOP_COMMUNITIES = st.sidebar.slider("Top Communities", 1, 5, 2)  # default 2
+TOP_NODES_PER_COMM = st.sidebar.slider("Top Nodes per Community", 5, 50, 10)  # default 10
 
 # ----------------------------------------------------
 # Build Graphs
