@@ -47,17 +47,11 @@ df = df[df["second_level_domain"].isin(valid_domains)]
 st.subheader("📄 Dataset Preview")
 st.markdown("""
     <style>
-        [data-testid="stElementToolbar"] {
-            display: none;
-        }
-        [data-testid="stDataFrameToolbar"] {
-            display: none !important;
-        }
+        [data-testid="stElementToolbar"] {display: none;}
+        [data-testid="stDataFrameToolbar"] {display: none !important;}
     </style>
 """, unsafe_allow_html=True)
-
 st.dataframe(df.head(), hide_index=True)
-
 
 # ----------------------------------------------------
 # Verify required columns
@@ -73,7 +67,7 @@ df["countries"] = df["countries"].fillna("").apply(lambda x: x.split(",") if isi
 df["cleaned_keywords"] = df["cleaned_keywords"].fillna("")
 
 # ----------------------------------------------------
-# Caching Graph Builders
+# Graph Builders
 # ----------------------------------------------------
 @st.cache_data
 def build_graph_title(df):
@@ -137,9 +131,7 @@ def compute_top_countries(df, top_n=5):
                 countries_list.extend(c_list)
         countries_list = [c.strip() for c in countries_list if c.strip()]
         if countries_list:
-            # Count and remove duplicates
-            top_countries = [c for c, _ in Counter(countries_list).most_common(top_n)]
-            top_countries = list(dict.fromkeys(top_countries))
+            top_countries = list(dict.fromkeys([c for c, _ in Counter(countries_list).most_common(top_n)]))
             country_counts_dict[domain] = top_countries[:top_n]
         else:
             country_counts_dict[domain] = []
@@ -154,8 +146,8 @@ country_counts = compute_top_countries(df, top_n=5)
 # ----------------------------------------------------
 st.sidebar.title("⚙ Graph Options")
 graph_type = st.sidebar.radio("Select Graph Type:", ("Title Graph", "Country Graph"))
-TOP_COMMUNITIES = st.sidebar.slider("Top Communities", 1, 5, 2)  # default 2
-TOP_NODES_PER_COMM = st.sidebar.slider("Top Nodes per Community", 5, 50, 10)  # default 10
+TOP_COMMUNITIES = st.sidebar.slider("Top Communities", 1, 5, 2)
+TOP_NODES_PER_COMM = st.sidebar.slider("Top Nodes per Community", 5, 50, 10)
 
 # ----------------------------------------------------
 # Build Graphs
@@ -184,6 +176,12 @@ for comm in top_communities:
 H = G.subgraph(nodes_to_show)
 
 # ----------------------------------------------------
+# Helper: Truncate Text
+# ----------------------------------------------------
+def truncate_text(text, max_len=50):
+    return text if len(text) <= max_len else text[:max_len] + "…"
+
+# ----------------------------------------------------
 # Node Selection Dropdown
 # ----------------------------------------------------
 st.subheader("🖱️ Select Node")
@@ -196,13 +194,16 @@ st.session_state.selected_node = selected_node
 # ----------------------------------------------------
 st.subheader("ℹ️ Selected Node Details")
 if selected_node:
-    top_titles_node = ", ".join(df[df["second_level_domain"] == selected_node]["title_english"].head(3).tolist())
+    top_titles_node_full = df[df["second_level_domain"] == selected_node]["title_english"].tolist()
+    top_titles_preview = [truncate_text(t) for t in top_titles_node_full[:10]]  # first 10 titles
     top_countries = country_counts.get(selected_node, [])
     keywords_list = top_keywords.get(selected_node, [])
     
     st.markdown(f"### **{selected_node}**")
-    st.write(f"**Top Titles:** {top_titles_node}")
-    st.write(f"**Top Countries Discussed (Top 5):** {', '.join(top_countries) if top_countries else 'N/A'}")
+    st.write("**Top Titles (Full):**")
+    for t in top_titles_node_full[:10]:
+        st.write(f"- {t}")
+    st.write(f"**Top Countries (Top 5):** {', '.join(top_countries) if top_countries else 'N/A'}")
     st.write(f"**Keywords:** {', '.join(keywords_list) if keywords_list else 'N/A'}")
     st.write(f"**Total Connections (Full Graph):** {G.degree[selected_node]}")
 else:
@@ -218,6 +219,7 @@ color_palette = sns.color_palette("husl", TOP_COMMUNITIES).as_hex()
 comm_to_color = {comm: color_palette[i] for i, comm in enumerate(top_communities)}
 
 for node in H.nodes():
+    # Node size & color
     if node == selected_node:
         color = "#ff3333"
         size = 35
@@ -228,25 +230,21 @@ for node in H.nodes():
         color = comm_to_color.get(partition[node], "#3399ff")
         size = 15
 
+    # Prepare truncated tooltip
+    titles_list = df[df["second_level_domain"] == node]["title_english"].head(3).tolist()
+    titles_html = "<ul>" + "".join([f"<li>{truncate_text(t)}</li>" for t in titles_list]) + "</ul>"
     keywords_html = ", ".join(top_keywords.get(node, []))
     countries_html = "<br>".join(country_counts.get(node, [])) if country_counts.get(node) else "N/A"
-    top_titles_node = ", ".join(df[df["second_level_domain"] == node]["title_english"].head(3).tolist())
 
     tooltip_html = f"""
     <b>{node}</b><br>
-    <b>Top Titles:</b> {top_titles_node}<br>
+    <b>Top Titles:</b>{titles_html}
     <b>Keywords:</b> {keywords_html}<br>
     <b>Top Countries (Top 5):</b><br>{countries_html}<br>
     Connections: {len(list(H.neighbors(node)))}
     """
 
-    net.add_node(
-        node,
-        label=node,
-        color=color,
-        size=size,
-        title=tooltip_html
-    )
+    net.add_node(node, label=node, color=color, size=size, title=tooltip_html)
 
 for u, v, d in H.edges(data=True):
     net.add_edge(u, v, value=d.get("weight", 1))
