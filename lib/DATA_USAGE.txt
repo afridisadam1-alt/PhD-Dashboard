@@ -1,0 +1,16 @@
+DATA USAGE TERMS
+
+The dataset(s) included or referenced in this repository are provided strictly
+for academic inspection and reproducibility of the PhD research.
+
+You MAY:
+- View the data for personal learning or debugging the dashboard.
+
+You MAY NOT:
+- Re-share, re-upload, or redistribute the dataset.
+- Use the data in any publication, thesis, article, or public dataset.
+- Use it for model training beyond testing this dashboard.
+- Apply it in any commercial product or service.
+
+All rights belong to their original owners and are subject to their respective
+terms and conditions.

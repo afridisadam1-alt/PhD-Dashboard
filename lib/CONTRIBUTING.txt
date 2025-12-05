@@ -1,0 +1,9 @@
+CONTRIBUTING GUIDELINES
+
+This project is part of an active PhD research.
+External contributions are currently NOT accepted.
+
+If you discover issues, you may open an Issue on GitHub, but pull requests
+will not be merged at this stage.
+
+Thank you for understanding.

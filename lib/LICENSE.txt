@@ -1,0 +1,28 @@
+Custom Academic Non-Publication License (ANPL)
+Copyright (c) 2025 afridisadam1-alt
+
+This project ("PhD-Dashboard") is provided for academic, research, and personal
+use only. Redistribution, commercial use, or inclusion in any publication is
+STRICTLY PROHIBITED without explicit written permission from the author.
+
+You MAY:
+- View, run, and modify the code for personal or academic learning.
+- Use the dashboard locally for research exploration.
+- Fork the repository for personal use only.
+
+You MAY NOT:
+- Publish, submit, or include any part of this code, data, or results in any
+  academic paper, thesis, dissertation, blog post, report, or other publication.
+- Upload any part of this repository to another public repository or dataset.
+- Use the project for commercial purposes, consultancy, or profit.
+- Claim authorship or ownership of this work.
+
+This project forms part of an ongoing PhD research and is NOT peer-reviewed or
+officially published. It is shared publicly only for transparency and academic
+collaboration.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED. THE AUTHOR SHALL NOT BE LIABLE FOR ANY CLAIM, DAMAGES, OR LIABILITY
+ARISING FROM USE OF THIS SOFTWARE.
+
+For permission requests, contact the author directly.
